@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { GameState, loadState, saveState, resetState } from '@/lib/storage'
 import { recordBrush, updatePetStats } from '@/lib/gameLogic'
 import { checkNewAchievements } from '@/lib/achievements'
+import { useInstallPrompt } from '@/hooks/useInstallPrompt'
 import Pet from './Pet'
 import Streak from './Streak'
 import BrushButton from './BrushButton'
@@ -12,10 +13,12 @@ import Stats from './Stats'
 import Achievements from './Achievements'
 import Settings from './Settings'
 import GuiltMessages from './GuiltMessages'
+import { Download } from 'lucide-react'
 
 export default function Dashboard() {
   const [state, setState] = useState<GameState | null>(null)
   const [showAchievement, setShowAchievement] = useState<string | null>(null)
+  const { isInstallable, promptInstall } = useInstallPrompt()
   
   useEffect(() => {
     const loaded = loadState()
@@ -31,6 +34,12 @@ export default function Dashboard() {
     
     return () => clearInterval(interval)
   }, [state])
+
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {})
+    }
+  }, [])
   
   const handleBrush = (duration: number) => {
     if (!state) return
@@ -96,7 +105,22 @@ export default function Dashboard() {
           <h1 className="text-4xl font-black text-white tracking-tight">
             🦷 Dientes App
           </h1>
-          <Settings state={state} onUpdate={handleUpdate} onReset={handleReset} />
+          <div className="flex items-center gap-3">
+            {isInstallable && (
+              <motion.button
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={promptInstall}
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white font-bold rounded-2xl shadow-lg shadow-cyan-500/50 transition-all"
+              >
+                <Download className="w-4 h-4" />
+                <span className="text-sm">Instalar</span>
+              </motion.button>
+            )}
+            <Settings state={state} onUpdate={handleUpdate} onReset={handleReset} />
+          </div>
         </motion.div>
         
         <GuiltMessages state={state} />

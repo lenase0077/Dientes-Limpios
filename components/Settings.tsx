@@ -1,29 +1,31 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { GameState } from '@/lib/storage'
 import { Settings as SettingsIcon, Save, RotateCcw, X, Bell, BellOff } from 'lucide-react'
+import { usePush } from '@/hooks/usePush'
 
 interface SettingsProps {
   state: GameState
   onUpdate: (state: GameState) => void
   onReset: () => void
-  onRequestNotificationPermission: () => Promise<boolean>
-  onSendTestNotification: () => void
-  notificationPermission: NotificationPermission | 'default'
-  notificationSupported: boolean
 }
 
 export default function Settings({ 
   state, 
   onUpdate, 
   onReset,
-  onRequestNotificationPermission,
-  onSendTestNotification,
-  notificationPermission,
-  notificationSupported,
 }: SettingsProps) {
+  const {
+    isSupported: notificationSupported,
+    isSubscribed,
+    permission,
+    subscribe,
+    unsubscribe,
+    scheduleReminders,
+    sendTestNotification,
+  } = usePush()
   const [isOpen, setIsOpen] = useState(false)
   const [petName, setPetName] = useState(state.petName)
   const [morningTime, setMorningTime] = useState(state.settings.morningTime)
@@ -42,6 +44,11 @@ export default function Settings({
         notifications,
       },
     })
+    
+    if (notifications && isSubscribed) {
+      scheduleReminders(morningTime, nightTime)
+    }
+    
     setIsOpen(false)
   }
   
@@ -52,23 +59,27 @@ export default function Settings({
   }
 
   const handleToggleNotifications = async () => {
-    if (!notifications && notificationPermission !== 'granted') {
-      const granted = await onRequestNotificationPermission()
-      if (!granted) {
-        alert('No se pudo obtener permiso para notificaciones. Revisa la configuración de tu navegador.')
-        return
+    if (!notifications) {
+      try {
+        await subscribe()
+        setNotifications(true)
+        scheduleReminders(morningTime, nightTime)
+      } catch (error) {
+        console.error('Error al activar notificaciones:', error)
+        alert('No se pudo activar las notificaciones. Revisa la configuración de tu navegador.')
+      }
+    } else {
+      try {
+        await unsubscribe()
+        setNotifications(false)
+      } catch (error) {
+        console.error('Error al desactivar notificaciones:', error)
       }
     }
-    setNotifications(!notifications)
   }
 
-  const handleTestNotification = async () => {
-    try {
-      await onSendTestNotification()
-    } catch (error) {
-      console.error('Error al enviar notificación:', error)
-      alert('Error al enviar notificación. Revisa la consola para más detalles.')
-    }
+  const handleTestNotification = () => {
+    sendTestNotification()
   }
   
   return (
@@ -174,11 +185,11 @@ export default function Settings({
                         </motion.button>
                       </div>
                       <p className="text-xs text-slate-400 mb-3">
-                        {notificationPermission === 'granted' 
+                        {permission === 'granted' 
                           ? 'Recibirás recordatorios molestos a la hora programada'
                           : 'Permite notificaciones para recibir recordatorios'}
                       </p>
-                      {notifications && notificationPermission === 'granted' && (
+                      {notifications && permission === 'granted' && (
                         <motion.button
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}

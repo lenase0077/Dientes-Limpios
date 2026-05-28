@@ -6,7 +6,7 @@ import { GameState, loadState, saveState, resetState } from '@/lib/storage'
 import { recordBrush, updatePetStats } from '@/lib/gameLogic'
 import { checkNewAchievements } from '@/lib/achievements'
 import { useInstallPrompt } from '@/hooks/useInstallPrompt'
-import { useNotifications } from '@/hooks/useNotifications'
+import { usePush } from '@/hooks/usePush'
 import Pet from './Pet'
 import Streak from './Streak'
 import BrushButton from './BrushButton'
@@ -22,12 +22,7 @@ export default function Dashboard() {
   const [showAchievement, setShowAchievement] = useState<string | null>(null)
   const [showWelcome, setShowWelcome] = useState(false)
   const { isInstallable, promptInstall } = useInstallPrompt()
-  const { 
-    permission: notificationPermission, 
-    isSupported: notificationSupported,
-    requestPermission: requestNotificationPermission,
-    sendTestNotification,
-  } = useNotifications(state)
+  const { subscribe, scheduleReminders } = usePush()
   
   useEffect(() => {
     const loaded = loadState()
@@ -48,12 +43,6 @@ export default function Dashboard() {
     
     return () => clearInterval(interval)
   }, [state])
-
-  useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').catch(() => {})
-    }
-  }, [])
   
   const handleBrush = (duration: number) => {
     if (!state) return
@@ -81,14 +70,19 @@ export default function Dashboard() {
   }
 
   const handleEnableNotifications = async () => {
-    const granted = await requestNotificationPermission()
-    if (granted && state) {
-      const updatedState = {
-        ...state,
-        settings: { ...state.settings, notifications: true }
+    try {
+      await subscribe()
+      if (state) {
+        const updatedState = {
+          ...state,
+          settings: { ...state.settings, notifications: true }
+        }
+        setState(updatedState)
+        saveState(updatedState)
+        scheduleReminders(state.settings.morningTime, state.settings.nightTime)
       }
-      setState(updatedState)
-      saveState(updatedState)
+    } catch (error) {
+      console.error('Error al activar notificaciones:', error)
     }
     localStorage.setItem('dientes-welcome-seen', 'true')
     setShowWelcome(false)
@@ -163,10 +157,6 @@ export default function Dashboard() {
               state={state} 
               onUpdate={handleUpdate} 
               onReset={handleReset}
-              onRequestNotificationPermission={requestNotificationPermission}
-              onSendTestNotification={sendTestNotification}
-              notificationPermission={notificationPermission}
-              notificationSupported={notificationSupported}
             />
           </div>
         </motion.div>

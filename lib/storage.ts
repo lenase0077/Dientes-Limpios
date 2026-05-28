@@ -20,7 +20,6 @@ export interface GameState {
     morningTime: string
     nightTime: string
     theme: 'light' | 'dark'
-    notifications: boolean
   }
   createdAt: number
 }
@@ -43,7 +42,6 @@ export const defaultState: GameState = {
     morningTime: '08:00',
     nightTime: '22:00',
     theme: 'dark',
-    notifications: false,
   },
   createdAt: Date.now(),
 }

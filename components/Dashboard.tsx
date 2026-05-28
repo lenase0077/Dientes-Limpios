@@ -6,7 +6,6 @@ import { GameState, loadState, saveState, resetState } from '@/lib/storage'
 import { recordBrush, updatePetStats } from '@/lib/gameLogic'
 import { checkNewAchievements } from '@/lib/achievements'
 import { useInstallPrompt } from '@/hooks/useInstallPrompt'
-import { usePush } from '@/hooks/usePush'
 import Pet from './Pet'
 import Streak from './Streak'
 import BrushButton from './BrushButton'
@@ -14,24 +13,16 @@ import Stats from './Stats'
 import Achievements from './Achievements'
 import Settings from './Settings'
 import GuiltMessages from './GuiltMessages'
-import WelcomeModal from './WelcomeModal'
 import { Download } from 'lucide-react'
 
 export default function Dashboard() {
   const [state, setState] = useState<GameState | null>(null)
   const [showAchievement, setShowAchievement] = useState<string | null>(null)
-  const [showWelcome, setShowWelcome] = useState(false)
   const { isInstallable, promptInstall } = useInstallPrompt()
-  const { subscribe, scheduleReminders } = usePush()
   
   useEffect(() => {
     const loaded = loadState()
     setState(updatePetStats(loaded))
-    
-    const hasSeenWelcome = localStorage.getItem('dientes-welcome-seen')
-    if (!hasSeenWelcome) {
-      setShowWelcome(true)
-    }
   }, [])
   
   useEffect(() => {
@@ -68,30 +59,6 @@ export default function Dashboard() {
     resetState()
     setState(loadState())
   }
-
-  const handleEnableNotifications = async () => {
-    try {
-      await subscribe()
-      if (state) {
-        const updatedState = {
-          ...state,
-          settings: { ...state.settings, notifications: true }
-        }
-        setState(updatedState)
-        saveState(updatedState)
-        scheduleReminders(state.settings.morningTime, state.settings.nightTime)
-      }
-    } catch (error) {
-      console.error('Error al activar notificaciones:', error)
-    }
-    localStorage.setItem('dientes-welcome-seen', 'true')
-    setShowWelcome(false)
-  }
-
-  const handleSkipWelcome = () => {
-    localStorage.setItem('dientes-welcome-seen', 'true')
-    setShowWelcome(false)
-  }
   
   if (!state) {
     return (
@@ -109,13 +76,6 @@ export default function Dashboard() {
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
-      <WelcomeModal
-        isOpen={showWelcome}
-        onClose={handleSkipWelcome}
-        onEnableNotifications={handleEnableNotifications}
-        onSkip={handleSkipWelcome}
-      />
-      
       <AnimatePresence>
         {showAchievement && (
           <motion.div

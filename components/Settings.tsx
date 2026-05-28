@@ -1,10 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { GameState } from '@/lib/storage'
-import { Settings as SettingsIcon, Save, RotateCcw, X, Bell, BellOff } from 'lucide-react'
-import { usePush } from '@/hooks/usePush'
+import { Settings as SettingsIcon, Save, RotateCcw, X } from 'lucide-react'
 
 interface SettingsProps {
   state: GameState
@@ -17,20 +16,10 @@ export default function Settings({
   onUpdate, 
   onReset,
 }: SettingsProps) {
-  const {
-    isSupported: notificationSupported,
-    isSubscribed,
-    permission,
-    subscribe,
-    unsubscribe,
-    scheduleReminders,
-    sendTestNotification,
-  } = usePush()
   const [isOpen, setIsOpen] = useState(false)
   const [petName, setPetName] = useState(state.petName)
   const [morningTime, setMorningTime] = useState(state.settings.morningTime)
   const [nightTime, setNightTime] = useState(state.settings.nightTime)
-  const [notifications, setNotifications] = useState(state.settings.notifications)
   const [showResetConfirm, setShowResetConfirm] = useState(false)
   
   const handleSave = () => {
@@ -41,14 +30,8 @@ export default function Settings({
         ...state.settings,
         morningTime,
         nightTime,
-        notifications,
       },
     })
-    
-    if (notifications && isSubscribed) {
-      scheduleReminders(morningTime, nightTime)
-    }
-    
     setIsOpen(false)
   }
   
@@ -56,30 +39,6 @@ export default function Settings({
     onReset()
     setShowResetConfirm(false)
     setIsOpen(false)
-  }
-
-  const handleToggleNotifications = async () => {
-    if (!notifications) {
-      try {
-        await subscribe()
-        setNotifications(true)
-        scheduleReminders(morningTime, nightTime)
-      } catch (error) {
-        console.error('Error al activar notificaciones:', error)
-        alert('No se pudo activar las notificaciones. Revisa la configuración de tu navegador.')
-      }
-    } else {
-      try {
-        await unsubscribe()
-        setNotifications(false)
-      } catch (error) {
-        console.error('Error al desactivar notificaciones:', error)
-      }
-    }
-  }
-
-  const handleTestNotification = () => {
-    sendTestNotification()
   }
   
   return (
@@ -111,7 +70,7 @@ export default function Settings({
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
               className="fixed inset-0 flex items-center justify-center z-50 p-4 pointer-events-none"
             >
-              <div className="glass rounded-3xl border border-white/10 p-8 w-full max-w-md shadow-2xl pointer-events-auto max-h-[90vh] overflow-y-auto">
+              <div className="glass rounded-3xl border border-white/10 p-8 w-full max-w-md shadow-2xl pointer-events-auto">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-2xl font-bold text-white flex items-center gap-3">
                     <SettingsIcon className="w-6 h-6" />
@@ -158,49 +117,6 @@ export default function Settings({
                       className="w-full px-4 py-3 bg-slate-800/50 border border-white/10 rounded-2xl text-white focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all backdrop-blur-sm"
                     />
                   </div>
-
-                  {notificationSupported && (
-                    <div className="p-4 bg-slate-800/30 rounded-2xl border border-white/10">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          {notifications ? (
-                            <Bell className="w-5 h-5 text-cyan-500" />
-                          ) : (
-                            <BellOff className="w-5 h-5 text-slate-500" />
-                          )}
-                          <span className="text-sm font-medium text-white">Notificaciones</span>
-                        </div>
-                        <motion.button
-                          whileTap={{ scale: 0.9 }}
-                          onClick={handleToggleNotifications}
-                          className={`relative w-12 h-6 rounded-full transition-colors ${
-                            notifications ? 'bg-cyan-500' : 'bg-slate-700'
-                          }`}
-                        >
-                          <motion.div
-                            animate={{ x: notifications ? 24 : 2 }}
-                            transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                            className="absolute top-1 w-4 h-4 bg-white rounded-full"
-                          />
-                        </motion.button>
-                      </div>
-                      <p className="text-xs text-slate-400 mb-3">
-                        {permission === 'granted' 
-                          ? 'Recibirás recordatorios molestos a la hora programada'
-                          : 'Permite notificaciones para recibir recordatorios'}
-                      </p>
-                      {notifications && permission === 'granted' && (
-                        <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={handleTestNotification}
-                          className="w-full px-4 py-2 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 font-medium rounded-xl transition-all border border-cyan-500/30 text-sm"
-                        >
-                          Enviar notificación de prueba
-                        </motion.button>
-                      )}
-                    </div>
-                  )}
                 </div>
                 
                 <div className="flex gap-3 mt-8">

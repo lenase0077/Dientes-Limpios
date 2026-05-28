@@ -43,7 +43,7 @@ export const defaultState: GameState = {
     morningTime: '08:00',
     nightTime: '22:00',
     theme: 'dark',
-    notifications: true,
+    notifications: false,
   },
   createdAt: Date.now(),
 }

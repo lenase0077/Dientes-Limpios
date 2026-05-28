@@ -14,11 +14,13 @@ import Stats from './Stats'
 import Achievements from './Achievements'
 import Settings from './Settings'
 import GuiltMessages from './GuiltMessages'
+import WelcomeModal from './WelcomeModal'
 import { Download } from 'lucide-react'
 
 export default function Dashboard() {
   const [state, setState] = useState<GameState | null>(null)
   const [showAchievement, setShowAchievement] = useState<string | null>(null)
+  const [showWelcome, setShowWelcome] = useState(false)
   const { isInstallable, promptInstall } = useInstallPrompt()
   const { 
     permission: notificationPermission, 
@@ -30,6 +32,11 @@ export default function Dashboard() {
   useEffect(() => {
     const loaded = loadState()
     setState(updatePetStats(loaded))
+    
+    const hasSeenWelcome = localStorage.getItem('dientes-welcome-seen')
+    if (!hasSeenWelcome) {
+      setShowWelcome(true)
+    }
   }, [])
   
   useEffect(() => {
@@ -72,6 +79,25 @@ export default function Dashboard() {
     resetState()
     setState(loadState())
   }
+
+  const handleEnableNotifications = async () => {
+    const granted = await requestNotificationPermission()
+    if (granted && state) {
+      const updatedState = {
+        ...state,
+        settings: { ...state.settings, notifications: true }
+      }
+      setState(updatedState)
+      saveState(updatedState)
+    }
+    localStorage.setItem('dientes-welcome-seen', 'true')
+    setShowWelcome(false)
+  }
+
+  const handleSkipWelcome = () => {
+    localStorage.setItem('dientes-welcome-seen', 'true')
+    setShowWelcome(false)
+  }
   
   if (!state) {
     return (
@@ -89,6 +115,13 @@ export default function Dashboard() {
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
+      <WelcomeModal
+        isOpen={showWelcome}
+        onClose={handleSkipWelcome}
+        onEnableNotifications={handleEnableNotifications}
+        onSkip={handleSkipWelcome}
+      />
+      
       <AnimatePresence>
         {showAchievement && (
           <motion.div

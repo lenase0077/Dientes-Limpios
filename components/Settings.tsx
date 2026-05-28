@@ -54,9 +54,21 @@ export default function Settings({
   const handleToggleNotifications = async () => {
     if (!notifications && notificationPermission !== 'granted') {
       const granted = await onRequestNotificationPermission()
-      if (!granted) return
+      if (!granted) {
+        alert('No se pudo obtener permiso para notificaciones. Revisa la configuración de tu navegador.')
+        return
+      }
     }
     setNotifications(!notifications)
+  }
+
+  const handleTestNotification = async () => {
+    try {
+      await onSendTestNotification()
+    } catch (error) {
+      console.error('Error al enviar notificación:', error)
+      alert('Error al enviar notificación. Revisa la consola para más detalles.')
+    }
   }
   
   return (
@@ -170,7 +182,7 @@ export default function Settings({
                         <motion.button
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
-                          onClick={onSendTestNotification}
+                          onClick={handleTestNotification}
                           className="w-full px-4 py-2 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 font-medium rounded-xl transition-all border border-cyan-500/30 text-sm"
                         >
                           Enviar notificación de prueba

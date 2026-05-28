@@ -37,8 +37,11 @@ export function useNotifications(state: GameState | null) {
     }
   }
 
-  const sendTestNotification = () => {
-    if (permission !== 'granted') return
+  const sendTestNotification = async () => {
+    if (permission !== 'granted') {
+      console.warn('Permiso de notificaciones no otorgado')
+      return
+    }
 
     const messages = [
       '🦷 ¡Hora de cepillarte! Tu mascota te espera...',
@@ -46,17 +49,35 @@ export function useNotifications(state: GameState | null) {
       '🔥 ¡No rompas tu racha! Cepíllate ahora',
       '😢 Dientín está llorando... ¡salvalo!',
       '🦠 Las bacterias están ganando la batalla',
+      '💀 ¿Quieres terminar sin dientes? ¡Cepíllate!',
+      '⚡ Tu dentista está llorando en este momento...',
+      '🎯 ¡Mantén tu racha viva! Cepíllate ya',
     ]
 
     const randomMessage = messages[Math.floor(Math.random() * messages.length)]
 
-    new Notification('Dientes Limpios', {
-      body: randomMessage,
-      icon: '/icon.svg',
-      badge: '/icon.svg',
-      tag: 'brush-reminder',
-      requireInteraction: true,
-    })
+    if ('serviceWorker' in navigator && navigator.serviceWorker.ready) {
+      const registration = await navigator.serviceWorker.ready
+      registration.showNotification('Dientes Limpios', {
+        body: randomMessage,
+        icon: '/icon.svg',
+        badge: '/icon.svg',
+        tag: 'brush-test',
+        requireInteraction: true,
+        actions: [
+          { action: 'open', title: 'Abrir App' },
+          { action: 'dismiss', title: 'Después' },
+        ],
+      } as any)
+    } else {
+      new Notification('Dientes Limpios', {
+        body: randomMessage,
+        icon: '/icon.svg',
+        badge: '/icon.svg',
+        tag: 'brush-reminder',
+        requireInteraction: true,
+      })
+    }
   }
 
   useEffect(() => {

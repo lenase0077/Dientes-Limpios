@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { GameState } from '@/lib/storage'
 import { getGuiltMessage, getHoursSinceLastBrush, getTimeUntilNextBrush } from '@/lib/gameLogic'
 import { Clock } from 'lucide-react'
@@ -48,25 +48,13 @@ export default function GuiltMessages({ state }: GuiltMessagesProps) {
       className={`glass rounded-3xl p-6 border backdrop-blur-sm ${urgencyStyles[urgency]}`}
     >
       <div className="flex items-start gap-4">
-        <motion.span
-          animate={urgency === 'critical' ? { scale: [1, 1.2, 1] } : {}}
-          transition={{ duration: 1, repeat: Infinity }}
-          className="text-3xl"
-        >
+        <span className="text-3xl">
           {urgencyIcons[urgency]}
-        </motion.span>
+        </span>
         <div className="flex-1">
-          <AnimatePresence mode="wait">
-            <motion.p
-              key={message}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="text-base font-semibold text-white"
-            >
-              {message}
-            </motion.p>
-          </AnimatePresence>
+          <p className="text-base font-semibold text-white">
+            {message}
+          </p>
           
           {hours !== Infinity && hours > 8 && (
             <p className="text-sm text-slate-400 mt-2">

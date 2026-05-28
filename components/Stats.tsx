@@ -29,13 +29,9 @@ export default function Stats({ state }: StatsProps) {
       <div className="mb-6">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
-            <motion.span
-              animate={{ rotate: [0, 10, -10, 0] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="text-3xl"
-            >
+            <span className="text-3xl">
               {levelInfo.emoji}
-            </motion.span>
+            </span>
             <div>
               <h3 className="text-xl font-bold text-white">Nivel {levelInfo.level}</h3>
               <p className="text-sm text-slate-400">{levelInfo.title}</p>
@@ -58,12 +54,8 @@ export default function Stats({ state }: StatsProps) {
       
       <div className="grid grid-cols-2 gap-4">
         {stats.map((stat, i) => (
-          <motion.div
+          <div
             key={i}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.4 + i * 0.1 }}
-            whileHover={{ scale: 1.05, y: -2 }}
             className={`flex items-center gap-3 p-4 bg-gradient-to-br ${stat.bg} rounded-2xl border border-white/5 backdrop-blur-sm`}
           >
             <stat.icon className={`w-6 h-6 ${stat.color}`} />
@@ -71,7 +63,7 @@ export default function Stats({ state }: StatsProps) {
               <p className="text-xs text-slate-400 font-medium">{stat.label}</p>
               <p className="text-2xl font-bold text-white">{stat.value}</p>
             </div>
-          </motion.div>
+          </div>
         ))}
       </div>
     </motion.div>

@@ -37,9 +37,10 @@ export function useNotifications(state: GameState | null) {
     }
   }
 
-  const sendTestNotification = async () => {
+  const sendTestNotification = () => {
     if (permission !== 'granted') {
       console.warn('Permiso de notificaciones no otorgado')
+      alert('Primero tenés que dar permiso para notificaciones')
       return
     }
 
@@ -49,34 +50,21 @@ export function useNotifications(state: GameState | null) {
       '🔥 ¡No rompas tu racha! Cepíllate ahora',
       '😢 Dientín está llorando... ¡salvalo!',
       '🦠 Las bacterias están ganando la batalla',
-      '💀 ¿Quieres terminar sin dientes? ¡Cepíllate!',
-      '⚡ Tu dentista está llorando en este momento...',
-      '🎯 ¡Mantén tu racha viva! Cepíllate ya',
     ]
 
     const randomMessage = messages[Math.floor(Math.random() * messages.length)]
 
-    if ('serviceWorker' in navigator && navigator.serviceWorker.ready) {
-      const registration = await navigator.serviceWorker.ready
-      registration.showNotification('Dientes Limpios', {
+    try {
+      const notification = new Notification('Dientes Limpios', {
         body: randomMessage,
         icon: '/icon.svg',
-        badge: '/icon.svg',
         tag: 'brush-test',
-        requireInteraction: true,
-        actions: [
-          { action: 'open', title: 'Abrir App' },
-          { action: 'dismiss', title: 'Después' },
-        ],
-      } as any)
-    } else {
-      new Notification('Dientes Limpios', {
-        body: randomMessage,
-        icon: '/icon.svg',
-        badge: '/icon.svg',
-        tag: 'brush-reminder',
-        requireInteraction: true,
       })
+
+      setTimeout(() => notification.close(), 5000)
+    } catch (error) {
+      console.error('Error al enviar notificación:', error)
+      alert('Error al enviar notificación. Esto puede pasar en algunos navegadores mobile.')
     }
   }
 

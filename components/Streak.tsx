@@ -34,27 +34,10 @@ export default function Streak({ state }: StreakProps) {
     >
       <div className="flex flex-col items-center gap-4">
         <div className="flex items-center gap-3">
-          <motion.div
-            animate={state.streak > 0 ? {
-              scale: [1, 1.2, 1],
-              rotate: [0, 10, -10, 0],
-            } : {}}
-            transition={{
-              duration: 1.5,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-          >
-            <Flame className={`w-10 h-10 ${state.streak > 0 ? 'text-orange-500' : 'text-slate-600'}`} />
-          </motion.div>
-          <motion.span
-            key={state.streak}
-            initial={{ scale: 0.5, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="text-5xl font-black text-white"
-          >
+          <Flame className={`w-10 h-10 ${state.streak > 0 ? 'text-orange-500' : 'text-slate-600'}`} />
+          <span className="text-5xl font-black text-white">
             {state.streak}
-          </motion.span>
+          </span>
         </div>
         
         <p className="text-sm text-slate-400 font-medium">
@@ -62,9 +45,7 @@ export default function Streak({ state }: StreakProps) {
         </p>
         
         {state.streak > 0 && (
-          <motion.div
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: 1 }}
+          <div
             className={`w-full h-1.5 bg-gradient-to-r ${streakColor} rounded-full shadow-lg ${glowColor}`}
           />
         )}
@@ -75,15 +56,11 @@ export default function Streak({ state }: StreakProps) {
         </div>
         
         {state.streak >= 7 && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="mt-3 px-4 py-2 bg-gradient-to-r from-yellow-500/20 via-amber-500/20 to-orange-500/20 rounded-full border border-yellow-500/30 backdrop-blur-sm"
-          >
+          <div className="mt-3 px-4 py-2 bg-gradient-to-r from-yellow-500/20 via-amber-500/20 to-orange-500/20 rounded-full border border-yellow-500/30 backdrop-blur-sm">
             <span className="text-sm text-yellow-400 font-bold">
               🔥 x{state.streak >= 100 ? 4 : state.streak >= 30 ? 3 : state.streak >= 7 ? 2 : 1} XP BONUS
             </span>
-          </motion.div>
+          </div>
         )}
       </div>
     </motion.div>

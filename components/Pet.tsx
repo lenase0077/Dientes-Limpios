@@ -36,40 +36,23 @@ export default function Pet({ state }: PetProps) {
   }
   
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="glass rounded-3xl p-8 border border-white/10 shadow-2xl"
-    >
+    <div className="glass rounded-3xl p-8 border border-white/10 shadow-2xl">
       <div className="flex flex-col items-center gap-6">
-        <motion.div
-          animate={{
-            scale: mood === 'happy' ? [1, 1.05, 1] : 1,
-            rotate: mood === 'sad' || mood === 'sick' ? [-2, 2, -2] : 0,
-          }}
-          transition={{
-            duration: mood === 'happy' ? 2 : 1,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
+        <div
           className={`relative w-36 h-36 rounded-full bg-gradient-to-br ${petColors[mood]} flex items-center justify-center text-7xl shadow-2xl ring-4 ring-white/10`}
         >
           <span className="drop-shadow-2xl">{petEmojis[mood]}</span>
           {mood === 'happy' && (
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
-              className="absolute -top-3 -right-3 text-3xl"
-            >
+            <div className="absolute -top-3 -right-3 text-3xl">
               ✨
-            </motion.div>
+            </div>
           )}
           {mood === 'dead' && (
             <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center backdrop-blur-sm">
               <span className="text-5xl">⚰️</span>
             </div>
           )}
-        </motion.div>
+        </div>
         
         <div className="text-center">
           <h3 className="text-2xl font-bold text-white mb-1">{state.petName}</h3>
@@ -85,11 +68,9 @@ export default function Pet({ state }: PetProps) {
               <span className="text-sm font-bold text-white">{Math.round(state.petHealth)}%</span>
             </div>
             <div className="h-3 bg-slate-800/50 rounded-full overflow-hidden backdrop-blur-sm">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${state.petHealth}%` }}
-                transition={{ duration: 0.8, ease: 'easeOut' }}
-                className="h-full bg-gradient-to-r from-red-500 via-pink-500 to-rose-500 shadow-lg shadow-pink-500/50"
+              <div
+                className="h-full bg-gradient-to-r from-red-500 via-pink-500 to-rose-500 shadow-lg shadow-pink-500/50 transition-all duration-500"
+                style={{ width: `${state.petHealth}%` }}
               />
             </div>
           </div>
@@ -102,16 +83,14 @@ export default function Pet({ state }: PetProps) {
               <span className="text-sm font-bold text-white">{Math.round(state.petHappiness)}%</span>
             </div>
             <div className="h-3 bg-slate-800/50 rounded-full overflow-hidden backdrop-blur-sm">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${state.petHappiness}%` }}
-                transition={{ duration: 0.8, ease: 'easeOut' }}
-                className="h-full bg-gradient-to-r from-yellow-500 via-amber-500 to-orange-500 shadow-lg shadow-amber-500/50"
+              <div
+                className="h-full bg-gradient-to-r from-yellow-500 via-amber-500 to-orange-500 shadow-lg shadow-amber-500/50 transition-all duration-500"
+                style={{ width: `${state.petHappiness}%` }}
               />
             </div>
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   )
 }

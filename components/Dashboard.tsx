@@ -6,6 +6,7 @@ import { GameState, loadState, saveState, resetState } from '@/lib/storage'
 import { recordBrush, updatePetStats } from '@/lib/gameLogic'
 import { checkNewAchievements } from '@/lib/achievements'
 import { useInstallPrompt } from '@/hooks/useInstallPrompt'
+import { useNotifications } from '@/hooks/useNotifications'
 import Pet from './Pet'
 import Streak from './Streak'
 import BrushButton from './BrushButton'
@@ -19,6 +20,12 @@ export default function Dashboard() {
   const [state, setState] = useState<GameState | null>(null)
   const [showAchievement, setShowAchievement] = useState<string | null>(null)
   const { isInstallable, promptInstall } = useInstallPrompt()
+  const { 
+    permission: notificationPermission, 
+    isSupported: notificationSupported,
+    requestPermission: requestNotificationPermission,
+    sendTestNotification,
+  } = useNotifications(state)
   
   useEffect(() => {
     const loaded = loadState()
@@ -119,7 +126,15 @@ export default function Dashboard() {
                 <span className="text-sm">Instalar</span>
               </motion.button>
             )}
-            <Settings state={state} onUpdate={handleUpdate} onReset={handleReset} />
+            <Settings 
+              state={state} 
+              onUpdate={handleUpdate} 
+              onReset={handleReset}
+              onRequestNotificationPermission={requestNotificationPermission}
+              onSendTestNotification={sendTestNotification}
+              notificationPermission={notificationPermission}
+              notificationSupported={notificationSupported}
+            />
           </div>
         </motion.div>
         
